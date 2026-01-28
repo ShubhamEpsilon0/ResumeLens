@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from ..jd_extractor.JDExtractor import extractJobDescription
 
 app = FastAPI()
 
@@ -13,10 +15,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class JDData(BaseModel):
+    url: str
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+
+
+@app.post("/")
+async def root(jdData: JDData):
+    jd = await extractJobDescription(jdData.url)
+    return {"SummarizedJD": jd}
 
 
 
